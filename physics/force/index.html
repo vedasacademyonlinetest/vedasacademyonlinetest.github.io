@@ -1465,27 +1465,39 @@ function renderResult(r){
 
 // ── SAVE / SHARE / EXPORT ──
 function saveToSheet(r){
-  const now=new Date().toLocaleString("en-IN");
-  fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-   body: JSON.stringify({
-  name:     studentInfo.name,
-  mobile:   studentInfo.mobile,
-  cls:      studentInfo.cls,       // ← కొత్తది add
-  city:     studentInfo.city,      // ← class తీసేశాం
-  score:    r.netScore,
-  subject:  "Physics",
-  chapter:  "Force & Newton's Laws",
-  correct:  r.correct,
-  wrong:    r.wrong,
-  skipped:  r.skipped,
-  netscore: r.netScore,            // ← కొత్తది add
-  institute:"Vedas Academy",
-  datetime: now
-})
-  }).then(()=>{const b=document.getElementById("saveBanner");b.className="save-banner success";
-    b.textContent=UI[selectedLang].saveSuccess;b.style.display="block";})
-  .catch(()=>{const b=document.getElementById("saveBanner");b.className="save-banner error";
-    b.textContent=UI[selectedLang].saveError;b.style.display="block";});
+  const now = new Date().toLocaleString("en-IN");
+  const payload = {
+    name:     studentInfo.name,
+    mobile:   studentInfo.mobile,
+    cls:      studentInfo.cls,
+    city:     studentInfo.city,
+    subject:  "Physics",
+    chapter:  "Force & Newton's Laws",
+    score:    r.netScore,
+    correct:  r.correct,
+    wrong:    r.wrong,
+    skipped:  r.skipped,
+    netscore: r.netScore,
+    institute:"Vedas Academy",
+    datetime: now
+  };
+  
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload)
+  }).then(() => {
+    const b = document.getElementById("saveBanner");
+    b.className = "save-banner success";
+    b.textContent = UI[selectedLang].saveSuccess;
+    b.style.display = "block";
+  }).catch(() => {
+    const b = document.getElementById("saveBanner");
+    b.className = "save-banner error";
+    b.textContent = UI[selectedLang].saveError;
+    b.style.display = "block";
+  });
 }
 function savePDF(){
   const btn=document.querySelector(".btn-pdf");btn.textContent="⏳...";btn.disabled=true;
