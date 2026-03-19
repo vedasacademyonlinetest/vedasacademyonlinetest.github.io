@@ -1467,12 +1467,21 @@ function renderResult(r){
 function saveToSheet(r){
   const now=new Date().toLocaleString("en-IN");
   fetch(APPS_SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({name:studentInfo.name,mobile:studentInfo.mobile,
-      city:studentInfo.city+" (Class "+studentInfo.cls+")",score:r.netScore,
-      subject:"Physics",chapter:"Force & Newton's Laws",
-      correct:r.correct,wrong:r.wrong,skipped:r.skipped,
-      mocktest:"Physics | Force & Newton's Laws | Net:"+r.netScore,
-      institute:"Vedas Academy",datetime:now})
+   body: JSON.stringify({
+  name:     studentInfo.name,
+  mobile:   studentInfo.mobile,
+  cls:      studentInfo.cls,       // ← కొత్తది add
+  city:     studentInfo.city,      // ← class తీసేశాం
+  score:    r.netScore,
+  subject:  "Physics",
+  chapter:  "Force & Newton's Laws",
+  correct:  r.correct,
+  wrong:    r.wrong,
+  skipped:  r.skipped,
+  netscore: r.netScore,            // ← కొత్తది add
+  institute:"Vedas Academy",
+  datetime: now
+})
   }).then(()=>{const b=document.getElementById("saveBanner");b.className="save-banner success";
     b.textContent=UI[selectedLang].saveSuccess;b.style.display="block";})
   .catch(()=>{const b=document.getElementById("saveBanner");b.className="save-banner error";
