@@ -385,6 +385,11 @@ body{font-family:var(--font);background:var(--cream);color:var(--text);overflow-
     </div>
 
     <div class="reg-field">
+      <label class="reg-label">Email <span class="reg-label-te">ఇమెయిల్ (ఐచ్ఛికం / optional)</span></label>
+      <input class="reg-input" id="reg-email" type="email" placeholder="student@example.com" autocomplete="off">
+    </div>
+
+    <div class="reg-field">
       <label class="reg-label">Class / Role <span class="reg-label-te">తరగతి / పాత్ర</span></label>
       <select class="reg-select" id="reg-class" style="width:100%">
         <option value="">Select Class / Role</option>
@@ -1737,6 +1742,7 @@ function showRegistration() {
 function submitRegistration() {
   var name  = document.getElementById('reg-name').value.trim();
   var phone = document.getElementById('reg-phone').value.trim();
+  var email = (document.getElementById('reg-email') || {value:''}).value.trim();
   var cls   = document.getElementById('reg-class').value;
   var valid = true;
 
@@ -1750,7 +1756,7 @@ function submitRegistration() {
 
   if (!valid) return;
 
-  studentInfo = { name: name, phone: phone, cls: cls };
+  studentInfo = { name: name, phone: phone, email: email, cls: cls };
   document.getElementById('reg-overlay').classList.remove('show');
   startTest();
 }
@@ -2033,6 +2039,13 @@ function submitTest() {
   // ── Save Results to Google Sheets (iframe form - works from local files) ──
   var SHEET_URL = 'https://script.google.com/macros/s/AKfycbzfmlCOEZpwvj1UDRb658r8aomuLiQXyxY60VGWoX9vRvYsn4ocbqYs3SzN2pl0fEdeYg/exec';
   (function() {
+    // Compute time taken (MM:SS format)
+    var ttSec  = 120*60 - timeLeft;
+    var ttMin  = Math.floor(ttSec / 60);
+    var ttRem  = ttSec % 60;
+    var timeStr = ttMin + 'm ' + (ttRem < 10 ? '0' : '') + ttRem + 's';
+    var totalObjective = META.filter(function(q){ return !q.is_subj; }).length;
+
     var ifrName = 'gs_iframe_' + Date.now();
     var ifr = document.createElement('iframe');
     ifr.name = ifrName;
@@ -2045,17 +2058,18 @@ function submitTest() {
     frm.target  = ifrName;
 
     var fields = {
-      name:     studentInfo.name  || '',
-      mobile:   studentInfo.phone || '',
-      cls:      studentInfo.cls   || '',
-      city:     '',
-      subject:  'Biology',
-      chapter:  'Respiration in Plants & Humans',
-      score:    score,
-      correct:  correct,
-      wrong:    wrong,
-      skipped:  skipped,
-      netscore: score
+      studentName:    studentInfo.name  || '',
+      phone:          studentInfo.phone || '',
+      email:          studentInfo.email || '',
+      class:          studentInfo.cls   || '',
+      subject:        'Biology',
+      chapter:        'Respiration in Plants & Humans',
+      totalQuestions: totalObjective,
+      correct:        correct,
+      wrong:          wrong,
+      unattempted:    skipped,
+      score:          score,
+      timeTaken:      timeStr
     };
 
     Object.keys(fields).forEach(function(k) {
