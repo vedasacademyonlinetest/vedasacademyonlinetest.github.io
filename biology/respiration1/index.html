@@ -88,19 +88,35 @@ body{font-family:var(--font);background:var(--cream);color:var(--text);overflow-
 .cp-divider{width:1px;height:20px;background:#e0e0e0;margin:0 .3rem;flex-shrink:0;}
 .cp-stats{font-size:.72rem;color:var(--muted);font-weight:700;margin-left:.4rem;white-space:nowrap;}
 
-/* ── QUESTION GRID (SIDEBAR + MAIN) ── */
-#test-layout{display:none;max-width:1200px;margin:0 auto;padding:.8rem .7rem 6rem;gap:.8rem;}
-@media(min-width:900px){#test-layout{display:none;grid-template-columns:240px 1fr;gap:1rem;padding:1rem 1.2rem 6rem;}}
+/* ── QUESTION GRID (MAIN ONLY — sidebar now floating) ── */
+#test-layout{display:none;max-width:860px;margin:0 auto;padding:.8rem .7rem 6rem;}
+@media(min-width:900px){#test-layout{display:none;padding:1rem 1.2rem 6rem;}}
 
-/* ── QUESTION SIDEBAR ── */
-#qmap{background:#fff;border-radius:14px;box-shadow:0 4px 20px var(--shadow);
-  padding:.8rem;position:sticky;top:110px;max-height:calc(100vh - 130px);
-  overflow-y:auto;display:none;}
-@media(min-width:900px){#qmap{display:block;}}
+/* ── QUESTION MAP — RIGHT FLOATING PANEL ── */
+#qmap-toggle-btn{
+  position:fixed;right:0;top:50%;transform:translateY(-50%);
+  z-index:500;background:var(--nv);color:var(--ac);border:none;
+  border-radius:10px 0 0 10px;padding:.7rem .4rem;
+  font-size:.68rem;font-weight:800;cursor:pointer;
+  writing-mode:vertical-rl;letter-spacing:2px;
+  box-shadow:-3px 0 15px var(--shadow);transition:all .2s;
+  display:none;line-height:1.2;
+}
+#qmap-toggle-btn:hover{background:var(--nv2);}
+#qmap{
+  position:fixed;right:-270px;top:50%;transform:translateY(-50%);
+  z-index:499;width:260px;max-height:78vh;
+  background:#fff;border-radius:14px 0 0 14px;
+  box-shadow:-4px 0 30px var(--shadow);
+  padding:.85rem;overflow-y:auto;
+  transition:right .3s cubic-bezier(.4,0,.2,1);
+  display:none;
+}
+#qmap.open{right:0;}
 .qmap-title{font-size:.78rem;font-weight:800;color:var(--nv);margin-bottom:.6rem;
-  text-transform:uppercase;letter-spacing:1px;}
-.qmap-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;}
-@media(min-width:900px){.qmap-grid{grid-template-columns:repeat(5,1fr);gap:4px;}}
+  text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between;}
+.qmap-close-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--muted);line-height:1;}
+.qmap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
 .qmap-btn{border:none;border-radius:5px;font-family:var(--font);font-size:.7rem;
   font-weight:700;cursor:pointer;padding:.3rem 0;text-align:center;transition:all .18s;}
 .qmap-btn.nv{background:#eceff1;color:#546e7a;}
@@ -473,9 +489,11 @@ body{font-family:var(--font);background:var(--cream);color:var(--text);overflow-
 
 <!-- ════ TEST LAYOUT ════ -->
 <div id="test-layout">
-  <!-- Question map sidebar (large screens) -->
+  <!-- Q Map Toggle Button -->
+  <button id="qmap-toggle-btn" onclick="toggleQmap()">📋 Q MAP</button>
+  <!-- Question map floating panel -->
   <div id="qmap">
-    <div class="qmap-title">📋 Question Map</div>
+    <div class="qmap-title">📋 Question Map <button class="qmap-close-btn" onclick="toggleQmap()">✕</button></div>
     <div class="qmap-grid" id="qmap-grid"></div>
   </div>
   <!-- Questions area -->
@@ -1767,6 +1785,8 @@ function startTest() {
   document.getElementById('cpanel').style.display = 'block';
   document.getElementById('test-layout').style.display = 'block';
   document.getElementById('bot-bar').style.display = 'flex';
+  document.getElementById('qmap').style.display = 'block';
+  document.getElementById('qmap-toggle-btn').style.display = 'block';
   buildQmap();
   addCardActions();
   startTimer();
@@ -1840,10 +1860,25 @@ function buildQmap() {
     btn.textContent = q.n;
     btn.onclick = function() {
       document.getElementById('qcard-' + q.n).scrollIntoView({behavior:'smooth', block:'center'});
+      toggleQmap(); // close panel after clicking
     };
     grid.appendChild(btn);
   });
 }
+
+function toggleQmap() {
+  var panel = document.getElementById('qmap');
+  panel.classList.toggle('open');
+}
+
+// Close qmap when clicking outside
+document.addEventListener('click', function(e) {
+  var panel = document.getElementById('qmap');
+  var btn = document.getElementById('qmap-toggle-btn');
+  if (panel && btn && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
 
 function updateQmap(n) {
   var btn = document.getElementById('qmb-' + n);
